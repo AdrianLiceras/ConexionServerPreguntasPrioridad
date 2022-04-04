@@ -76,4 +76,48 @@ class MainActivityViewModel: ViewModel() {
             }
         }
     }
+    fun enviar(respuesta: String){
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                setIsVisibleInMainThread(true)
+
+
+                val client = OkHttpClient()
+
+                val request = Request.Builder()
+                request.url("http://10.0.2.2:8081/enviarRespuesta/$respuesta")
+
+
+                val call = client.newCall(request.build())
+                call.enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        println(e.toString())
+                        CoroutineScope(Dispatchers.Main).launch {
+
+                            setResponseTextInMainThread("Algo ha ido mal")
+                            setIsVisibleInMainThread(false)
+                        }
+
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        println(response.toString())
+                        response.body?.let { responseBody ->
+                            val body = responseBody.string()
+                            // println(body)
+
+
+                            println(body)
+
+                            CoroutineScope(Dispatchers.Main).launch {
+                                setIsVisibleInMainThread(false)
+                                setResponseTextInMainThread(body.toString())
+                            }
+                        }
+                    }
+                })
+            }
+        }
+
+    }
 }

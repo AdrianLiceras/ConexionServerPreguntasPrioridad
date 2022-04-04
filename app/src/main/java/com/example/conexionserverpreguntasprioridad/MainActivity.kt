@@ -12,18 +12,25 @@ class MainActivity : AppCompatActivity() {
     private lateinit var  adapter:PreguntasAdapter
     private val viewModel : MainActivityViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
+        var respuesta=""
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         binding.recyclerview.layoutManager = LinearLayoutManager(this@MainActivity)
         setContentView(binding.root)
         initObserver()
         viewModel.getPreguntas()
+        binding.enviar.setOnClickListener {
+
+            adapter.comprobarClick(adapter.holderP)
+            respuesta=adapter.respuesta
+            println(respuesta)
+            viewModel.enviar(respuesta)
+        }
     }
     private fun initObserver() {
         viewModel.isVisible.observe(this) { isVisible ->
             if (isVisible) setVisible() else setGone()
         }
-
 
         viewModel.user.observe(this){
             //if( viewModel.user.value!=null)
